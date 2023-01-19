@@ -126,6 +126,23 @@ describe('Path', () => {
     })
   })
 
+  it('should match and build paths of query parameters with default value', () => {
+    const path = new Path('/pages?id&page=test&search')
+
+    expect(path.build()).toBe('/pages?page=test')
+    expect(path.build({ page: 'foo' })).toBe('/pages?page=foo')
+
+    const otherTestParams = {
+      id: 'test',
+      search: 'query'
+    }
+
+    expect(path.test('/pages?id=test&page=foo&search=query')).toEqual({
+      ...otherTestParams,
+      page: 'foo'
+    })
+  })
+
   it('should match and build paths with url and query parameters', () => {
     const path = new Path('/users/profile/:id-:id2?:id3')
     expect(path.hasQueryParams).toBe(true)

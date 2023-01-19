@@ -316,12 +316,25 @@ export class Path<T extends Record<string, any> = Record<string, any>> {
       return base
     }
 
+    const defaultSearchParams = this.tokens
+      .filter(t => /^query-parameter/.test(t.type))
+      .reduce<Record<string, string>>((acc, token) => {
+        if (token.otherVal[0]) {
+          acc[token.val[0] as string] = token.otherVal[0]
+        }
+
+        return acc
+      }, {})
+
     const searchParams = this.queryParams
-      .filter(p => Object.keys(params).indexOf(p) !== -1)
+      .filter(
+        p => Object.keys(params).indexOf(p) !== -1 || defaultSearchParams[p]
+      )
       .reduce<Record<string, any>>((sparams, paramName) => {
-        sparams[paramName] = params[paramName]
+        sparams[paramName] = params[paramName] || defaultSearchParams[paramName]
         return sparams
       }, {})
+
     const searchPart = buildQueryParams(searchParams, options.queryParams)
 
     return searchPart ? base + '?' + searchPart : base
